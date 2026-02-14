@@ -29,9 +29,13 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="participants-section">
             <h4>Participants</h4>
             ${details.participants && details.participants.length > 0
-              ? `<ul class="participants-list">
-                    ${details.participants.map(p => `<li>${p}</li>`).join('')}
-                 </ul>`
+              ? `<ul class="participants-list no-bullets">
+                    ${details.participants.map(p => `
+                  <li>
+                    <span class="participant-name">${p}</span>
+                    <span class="delete-participant" title="Remove" data-activity="${name}" data-participant="${p}">&#128465;</span>
+                  </li>`).join('')}
+             </ul>`
               : '<p class="info">No participants yet.</p>'}
           </div>
         `;
@@ -48,6 +52,62 @@ document.addEventListener("DOMContentLoaded", () => {
       activitiesList.innerHTML = "<p>Failed to load activities. Please try again later.</p>";
       console.error("Error fetching activities:", error);
     }
+  }
+
+  // Function to render activities
+  function renderActivities(activities) {
+    const activitiesList = document.getElementById('activities-list');
+    activitiesList.innerHTML = '';
+    if (!activities || activities.length === 0) {
+      activitiesList.innerHTML = '<p>No activities available.</p>';
+      return;
+    }
+    activities.forEach(activity => {
+      const card = document.createElement('div');
+      card.className = 'activity-card';
+      card.innerHTML = `
+        <h4>${activity.name}</h4>
+        <p>${activity.description}</p>
+        <p><strong>Location:</strong> ${activity.location}</p>
+        <p><strong>Time:</strong> ${activity.time}</p>
+        <div class="participants-section">
+          <h4>Participants</h4>
+          ${activity.participants && activity.participants.length > 0
+            ? `<ul class="participants-list no-bullets">
+                ${activity.participants.map(p => `
+                  <li>
+                    <span class="participant-name">${p}</span>
+                    <span class="delete-participant" title="Remove" data-activity="${activity.name}" data-participant="${p}">&#128465;</span>
+                  </li>`).join('')}
+             </ul>`
+            : '<p class="info">No participants yet.</p>'}
+        </div>
+      `;
+      activitiesList.appendChild(card);
+    });
+
+    // Add event listeners for delete icons
+    document.querySelectorAll('.delete-participant').forEach(icon => {
+      icon.addEventListener('click', function() {
+        const activityName = this.getAttribute('data-activity');
+        const participant = this.getAttribute('data-participant');
+        unregisterParticipant(activityName, participant);
+      });
+    });
+  }
+
+  // Function to unregister a participant from an activity
+  function unregisterParticipant(activityName, participant) {
+    // TODO: Implement backend call to unregister participant if needed
+    // For now, update the UI and local data (simulate)
+    if (window.activitiesData) {
+      const activity = window.activitiesData.find(a => a.name === activityName);
+      if (activity) {
+        activity.participants = activity.participants.filter(p => p !== participant);
+        renderActivities(window.activitiesData);
+      }
+    }
+    // Optionally, show a message or handle errors
   }
 
   // Handle form submission
