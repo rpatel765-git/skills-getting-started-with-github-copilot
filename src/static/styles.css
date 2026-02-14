@@ -11,31 +11,25 @@
   font-weight: 600;
 }
 
+
 .participants-list {
   margin: 0;
   padding-left: 0;
   list-style-type: none;
 }
-
-.participants-list.no-bullets {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.participant-name {
-  margin-right: 0.5em;
-}
-
-.delete-participant {
-  color: #c62828;
+ .delete-btn {
+  background: none;
+  border: none;
   cursor: pointer;
-  margin-left: 0.2em;
+  color: #c62828;
   font-size: 1.1em;
-  vertical-align: middle;
+  margin-left: 8px;
+  padding: 0 4px;
   transition: color 0.2s;
 }
-.delete-participant:hover {
-  color: #ff1744;
+.delete-btn:hover {
+  color: #a31515;
+}
 }
 
 .participants-list li {

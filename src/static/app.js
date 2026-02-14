@@ -29,16 +29,52 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="participants-section">
             <h4>Participants</h4>
             ${details.participants && details.participants.length > 0
-              ? `<ul class="participants-list no-bullets">
+              ? `<ul class="participants-list" style="list-style: none; padding-left: 0;">
                     ${details.participants.map(p => `
-                  <li>
-                    <span class="participant-name">${p}</span>
-                    <span class="delete-participant" title="Remove" data-activity="${name}" data-participant="${p}">&#128465;</span>
-                  </li>`).join('')}
-             </ul>`
+                      <li style="display: flex; align-items: center;">
+                        <span>${p}</span>
+                        <button class="delete-btn" data-activity="${name}" data-email="${p}" title="Remove participant" style="margin-left: 8px; background: none; border: none; cursor: pointer; color: #c62828; font-size: 1.1em;">🗑️</button>
+                      </li>`).join('')}
+                 </ul>`
               : '<p class="info">No participants yet.</p>'}
           </div>
         `;
+      // ...existing code...
+  // Add event delegation for delete buttons ONCE after DOM is ready
+  activitiesList.addEventListener("click", async (event) => {
+    if (event.target.classList.contains("delete-btn")) {
+      const btn = event.target;
+      const activity = btn.getAttribute("data-activity");
+      const email = btn.getAttribute("data-email");
+      if (confirm(`Remove ${email} from ${activity}?`)) {
+        try {
+          const response = await fetch(`/activities/${encodeURIComponent(activity)}/participant?email=${encodeURIComponent(email)}`, {
+            method: "DELETE",
+          });
+          const result = await response.json();
+          if (response.ok) {
+            messageDiv.textContent = result.message;
+            messageDiv.className = "success";
+            fetchActivities();
+          } else {
+            messageDiv.textContent = result.detail || "An error occurred";
+            messageDiv.className = "error";
+          }
+          messageDiv.classList.remove("hidden");
+          setTimeout(() => {
+            messageDiv.classList.add("hidden");
+          }, 5000);
+        } catch (error) {
+          messageDiv.textContent = "Failed to remove participant. Please try again.";
+          messageDiv.className = "error";
+          messageDiv.classList.remove("hidden");
+          setTimeout(() => {
+            messageDiv.classList.add("hidden");
+          }, 5000);
+        }
+      }
+    }
+  });
 
         activitiesList.appendChild(activityCard);
 
@@ -131,6 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Refresh activities list after successful signup
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
